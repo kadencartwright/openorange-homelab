@@ -12,4 +12,13 @@ The Engine image shown in the upstream quickstart (`3.0.1`) returned HTTP 500 to
 
 `npm audit` reported **12 dependency advisories (7 moderate, 5 high)** in the example's locked OpenOrange dependency tree, including transitive Wrangler/Miniflare, Undici, Zod and Sharp advisories. No forced upgrades or compatibility-breaking overrides were applied. Inspect `npm audit` when updating; keep this installation restricted to your tailnet and trusted applications.
 
-Not performed: a full NixOS system closure build, a VM boot, installation on the user's mini PC, actual Tailscale enrollment/policy validation, filesystem restore testing or a hardware power-loss test. The installer’s destructive partitioning commands were reviewed and linted, not run against a disk. Hardware, boot mode and networking must be verified during the physical installation. CI evaluates and lints; it does not claim hardware or runtime coverage.
+Not performed for the initial bare-metal configuration: a full bare-metal system closure build, installation on the user's mini PC, actual Tailscale enrollment/policy validation, filesystem restore testing or a hardware power-loss test. The installer’s destructive partitioning commands were reviewed and linted, not run against a disk. Hardware, boot mode and networking must be verified during the physical installation. CI evaluates and lints; it does not claim hardware or runtime coverage.
+
+
+## VM follow-up — November 12, 2026
+
+- Built the complete `nixosConfigurations.vm.config.system.build.vm` closure and booted it with KVM on the development host: 4 vCPUs, 8 GiB RAM and a 40 GiB persistent root disk.
+- Confirmed SSH key bootstrap, the read-only public-key share, Docker, Engine, pool creation, Nginx and the demo Worker. No failed systemd units.
+- Built/imported the demo image through `scripts/vm.sh deploy-demo`. The same `alice` Durable Object returned count 1 before an orderly VM shutdown and 2 after restarting from the same disk, then 3 after deploying the web UI.
+- Confirmed the root route serves the demo page, and counter API GET/POST/GET returned 0/1/1. Browser interactions were not automated; HTTP routes and returned page content were checked directly.
+- The VM runner is managed by a systemd user service; state and management private key remain outside this repository.

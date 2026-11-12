@@ -16,6 +16,10 @@ This installs NixOS on bare metal. OpenOrange and Rivet use their upstream conta
 
 One machine has one copy of its data: this is a home lab, not a highly available cluster. Use off-box backups. Suggested starting hardware: 4 CPU cores, 8 GiB RAM (16 preferred), SSD/NVMe, wired Ethernet. These are sizing suggestions, not upstream minimums. Rivet requires at least 10% free disk space and at least 4 GiB free. Engine defaults here reserve at most 2 GiB RAM / 2 CPUs; each Worker defaults to 2 GiB / 2 CPUs. Leave memory for the OS and increase limits after measuring your workloads.
 
+## Try it in a VM
+
+See [the VM guide](docs/vm.md) for a persistent local QEMU/KVM VM, Tailscale enrollment, and deployment of the included counter demo.
+
 ## Install on the mini PC
 
 1. Back up the mini PC. Boot a current **NixOS x86-64 installer USB in UEFI mode**, with Secure Boot disabled. Connect Ethernet (or configure networking from the installer). Have your SSH **public** key on the USB or otherwise available there.
@@ -76,7 +80,7 @@ sudo bash scripts/health.sh
 curl http://127.0.0.1:8080/alice
 ```
 
-From another tailnet device: `curl http://orangebox:8080/alice`. The returned `count` increases and should survive a reboot. Add other workloads with unique names and public/internal ports. The module creates each pool before starting its Worker. Keep the Worker's Wrangler name and pool stable between releases so its Durable Objects retain their identities. Do not share a pool between unrelated applications.
+From another tailnet device, open `http://orangebox:8080/` for the demo page, or run `curl http://orangebox:8080/alice` for JSON. The returned `count` increases and should survive a reboot. Add other workloads with unique names and public/internal ports. The module creates each pool before starting its Worker. Keep the Worker's Wrangler name and pool stable between releases so its Durable Objects retain their identities. Do not share a pool between unrelated applications.
 
 The proxy uses HTTP inside Tailscale's encrypted network. It does not publish anything to the internet. If you later add Tailscale Serve, configure its HTTPS proxy explicitly; Funnel is not enabled by this project. Use an SSH tunnel for local administration of the Engine API:
 

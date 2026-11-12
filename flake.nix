@@ -30,6 +30,7 @@
     {
       nixosModules.openorange = import ./modules/openorange.nix;
       nixosConfigurations.minipc = host;
+      nixosConfigurations.vm = mkHost [ ./hosts/vm ];
       formatter.${system} = pkgs.nixfmt;
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
