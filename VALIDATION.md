@@ -22,3 +22,5 @@ Not performed for the initial bare-metal configuration: a full bare-metal system
 - Built/imported the demo image through `scripts/vm.sh deploy-demo`. The same `alice` Durable Object returned count 1 before an orderly VM shutdown and 2 after restarting from the same disk, then 3 after deploying the web UI.
 - Confirmed the root route serves the demo page, and counter API GET/POST/GET returned 0/1/1. Browser interactions were not automated; HTTP routes and returned page content were checked directly.
 - The VM runner is managed by a systemd user service; state and management private key remain outside this repository.
+
+- Enrolled the running VM in the user’s tailnet using browser approval. Verified the demo HTML and counter API from the host through the VM’s Tailscale IPv4 address, including a successful POST increment. The host resolver did not resolve the VM’s MagicDNS name, so the verified access URL uses its Tailscale IP.
