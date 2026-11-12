@@ -1,0 +1,7 @@
+{
+  "name": "homelab-hello",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-03",
+  "durable_objects": { "bindings": [{ "name": "COUNTERS", "class_name": "Counter" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Counter"] }]
+}

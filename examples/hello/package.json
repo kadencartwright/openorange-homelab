@@ -1,0 +1,6 @@
+{
+  "name": "homelab-hello",
+  "private": true,
+  "type": "module",
+  "devDependencies": { "open-orange": "1.0.1" }
+}

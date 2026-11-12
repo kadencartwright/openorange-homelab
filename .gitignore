@@ -1,0 +1,9 @@
+result*
+.open-orange/
+node_modules/
+.env
+.env.*
+*.env
+*.tar
+*.tar.gz
+*.key
