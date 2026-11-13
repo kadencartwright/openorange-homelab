@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/kadencartwright/opds-r2-library.git",
+  "revision": "384f1c94e8a622c201ecca597d054b2817c3feb4",
+  "openOrangeVersion": "1.0.1",
+  "image": "localhost/folio-homelab:384f1c9"
+}
