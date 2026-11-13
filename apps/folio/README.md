@@ -1,5 +1,7 @@
 # Folio in the homelab
 
+**Status:** removed from the Bosgame VM on November 13, 2026 at the owner's request. The host configuration no longer imports this module, and the private Tailscale HTTPS route has been removed. Local data and secrets remain under `/var/lib/folio` for recovery. The instructions below describe the optional deployment, which is currently inactive.
+
 This deployment uses the cleaned public [Folio source](https://github.com/kadencartwright/opds-r2-library), pinned by revision in `source.json`, and OpenOrange 1.0.1. Application code is unchanged; the build adds an Orange CLI and a homelab Wrangler configuration.
 
 Folio runs in the existing NixOS VM on Bosgame at **https://orangebox-vm.bleak-banana.ts.net/**. Campfire remains on port 8080. This is an **independent, initially empty library**: no database, books, readers, credentials or sessions are copied from the Cloudflare installation. The existing cloud library is unchanged.
