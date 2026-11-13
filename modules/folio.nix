@@ -36,7 +36,7 @@ in
     enable = lib.mkEnableOption "independent Folio library on an isolated OpenOrange Engine";
     origin = lib.mkOption {
       type = lib.types.str;
-      default = "http://100.96.205.20:8081";
+      default = "https://orangebox-vm.bleak-banana.ts.net";
     };
     adminEmail = lib.mkOption {
       type = lib.types.str;
@@ -61,6 +61,24 @@ in
       "worker"
       "secrets"
     ];
+    systemd.services.folio-https = {
+      wantedBy = [ "multi-user.target" ];
+      wants = [
+        "tailscaled.service"
+        "nginx.service"
+      ];
+      after = [
+        "tailscaled.service"
+        "nginx.service"
+      ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        Restart = "on-failure";
+        RestartSec = 15;
+      };
+      script = "${pkgs.tailscale}/bin/tailscale serve --bg --https=443 http://127.0.0.1:8081";
+    };
     systemd.services.folio-secrets = {
       before = [ "docker-folio-engine.service" ];
       serviceConfig = {
@@ -196,11 +214,11 @@ in
         exit 1
       '';
     };
-    networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 8081 ];
+    networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 443 ];
     services.nginx.virtualHosts."folio.local" = {
       listen = [
         {
-          addr = "0.0.0.0";
+          addr = "127.0.0.1";
           port = 8081;
         }
       ];
@@ -212,9 +230,9 @@ in
         proxyWebsockets = true;
         recommendedProxySettings = false;
         extraConfig = ''
-          proxy_set_header Host $host:8081;
+          proxy_set_header Host ${lib.removePrefix "https://" cfg.origin};
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_set_header X-Forwarded-Proto https;
           client_max_body_size 17m;
           proxy_read_timeout 3600s;
         '';
