@@ -6,9 +6,9 @@ email=${1:-admin@example.com}
 [[ $email =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+$ ]] || { echo 'Invalid administrator email.' >&2; exit 2; }
 bash "$repo/scripts/vm.sh" ssh sudo python3 - "$email" <<'PY'
 import json,sys,urllib.request
+from pathlib import Path
 email=sys.argv[1]
-# This origin must match services.folioHomelab.origin in the flake.
-origin='http://100.96.205.20:8081'
+origin=Path('/etc/folio/origin').read_text().strip()
 request=urllib.request.Request('http://127.0.0.1:18081/api/auth/sign-in/magic-link',
  data=json.dumps({'email':email,'callbackURL':'/'}).encode(),
  headers={'Content-Type':'application/json','Origin':origin},method='POST')

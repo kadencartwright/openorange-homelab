@@ -8,14 +8,18 @@ let
   cfg = config.services.folioHomelab;
   engineConfig = pkgs.writeText "folio-rivet.json" (
     builtins.toJSON {
+      metrics = {
+        host = "127.0.0.1";
+        port = 6450;
+      };
       guard = {
         host = "127.0.0.1";
-        port = 6430;
+        port = 6440;
       };
       api_peer = {
         host = "127.0.0.1";
-        port = 6431;
-        advertise_address = "127.0.0.1:6431";
+        port = 6441;
+        advertise_address = "127.0.0.1:6441";
       };
       storage = {
         log_directory = "/var/lib/rivet/log";
@@ -40,6 +44,8 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = [ pkgs.python3 ];
+    environment.etc."folio/origin".text = cfg.origin;
     assertions = [
       {
         assertion = config.services.openorange.enable;
@@ -99,7 +105,7 @@ in
       folio = {
         image = source.image;
         environment = {
-          RIVET_ENDPOINT = "http://127.0.0.1:6430";
+          RIVET_ENDPOINT = "http://127.0.0.1:6440";
           RIVET_NAMESPACE = "default";
           AUTH_ORIGIN = cfg.origin;
           ADMIN_EMAILS = cfg.adminEmail;
@@ -152,7 +158,7 @@ in
         token=$(cat /var/lib/folio/secrets/engine-token)
         for _ in $(seq 1 90); do
           if printf 'header = "Authorization: Bearer %s"\n' "$token" | curl --config - -sf --max-time 5 -X PUT \
-            -H 'Content-Type: application/json' -d '{}' 'http://127.0.0.1:6430/pools/default?namespace=default' > /dev/null; then exit 0; fi
+            -H 'Content-Type: application/json' -d '{}' 'http://127.0.0.1:6440/pools/default?namespace=default' > /dev/null; then exit 0; fi
           sleep 2
         done
         exit 1

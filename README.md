@@ -16,6 +16,10 @@ This installs NixOS on bare metal. OpenOrange and Rivet use their upstream conta
 
 One machine has one copy of its data: this is a home lab, not a highly available cluster. Use off-box backups. Suggested starting hardware: 4 CPU cores, 8 GiB RAM (16 preferred), SSD/NVMe, wired Ethernet. These are sizing suggestions, not upstream minimums. Rivet requires at least 10% free disk space and at least 4 GiB free. Engine defaults here reserve at most 2 GiB RAM / 2 CPUs; each Worker defaults to 2 GiB / 2 CPUs. Leave memory for the OS and increase limits after measuring your workloads.
 
+## Ebook library
+
+The Bosgame VM also hosts an independent [Folio ebook library](apps/folio/README.md) on port 8081, built from the pinned public `opds-r2-library` source. It has its own local D1/R2 equivalents and Engine. The existing Cloudflare library is unchanged. See the deployment guide for the SSH-only simulated-email sign-in flow.
+
 ## Chat demo
 
 Bosgame now serves [Campfire](examples/campfire/README.md), a Slack-style chat demo with persistent channel history, reactions, presence, typing indicators and realtime WebSockets backed by Durable Objects. Open the VM’s Tailscale address on port 8080. The original counter API is preserved.
