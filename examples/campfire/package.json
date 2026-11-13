@@ -1,0 +1,12 @@
+{
+  "name": "homelab-campfire",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "open-orange": "1.0.1",
+    "ws": "8.21.0"
+  },
+  "scripts": {
+    "test:live": "node tests/live.mjs"
+  }
+}

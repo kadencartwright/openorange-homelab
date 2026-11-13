@@ -6,4 +6,5 @@
     memorySize = lib.mkForce 22528;
     diskSize = lib.mkForce 57344;
   };
+  services.openorange.workloads.hello.image = lib.mkForce "localhost/openorange-campfire:1";
 }
