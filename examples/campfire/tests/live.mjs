@@ -16,7 +16,10 @@ if (process.argv.includes('--verify')) {
   const message = history.messages.find(m => m.client_id === expected.clientId);
   assert.equal(message?.body, expected.body);
   assert.ok(message.reactions.some(r => r.emoji === '🔥' && r.author_id === expected.user));
-  console.log('PASS: message and reaction survived Worker restart');
+  const fresh = await connect('Restart check');
+  assert.ok(fresh.initial.messages.some(m => m.client_id === expected.clientId));
+  fresh.ws.close();
+  console.log('PASS: message and reaction survived Worker restart; new WebSocket received persisted history');
   process.exit(0);
 }
 const created = await fetch(origin + '/api/channels', { method: 'POST', headers: {'Content-Type':'application/json', Origin:origin}, body:JSON.stringify({id:room,description:'Automated realtime delivery and persistence checks.'}) });
@@ -26,12 +29,12 @@ assert.equal(badOrigin.status, 403);
 async function connect(name) {
   const id = randomUUID(), url = new URL(`/api/channels/${room}/socket`,origin);
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'; url.searchParams.set('name',name); url.searchParams.set('user',id);
-  const ws = new WebSocket(url,{origin}); const inbox=[], waiting=[];
+  const ws = new WebSocket(url,{origin,handshakeTimeout:15000}); const inbox=[], waiting=[];
   ws.on('message',raw=>{const data=JSON.parse(String(raw));const at=waiting.findIndex(w=>w.test(data));if(at>=0){const w=waiting.splice(at,1)[0];clearTimeout(w.timer);w.resolve(data);}else inbox.push(data);});
   const next=(test)=>{const at=inbox.findIndex(test);if(at>=0)return Promise.resolve(inbox.splice(at,1)[0]);return new Promise((resolve,reject)=>{const w={test,resolve,timer:setTimeout(()=>{const i=waiting.indexOf(w);if(i>=0)waiting.splice(i,1);reject(new Error('Timed out awaiting event'));},15000)};waiting.push(w);});};
   await new Promise((resolve,reject)=>{ws.once('open',resolve);ws.once('error',reject);});
-  await next(d=>d.type==='init');
-  return {id,ws,next,send:data=>ws.send(JSON.stringify(data))};
+  const initial=await next(d=>d.type==='init');
+  return {id,ws,initial,next,send:data=>ws.send(JSON.stringify(data))};
 }
 const a=await connect('Delivery check A'), b=await connect('Delivery check B');
 try {

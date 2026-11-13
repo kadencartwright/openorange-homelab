@@ -23,7 +23,7 @@ bash scripts/vm.sh ssh
 
 Use `sudo systemctl stop/start/restart openorange-homelab-vm` for this installation. The service's stop hook requests guest poweroff and waits for QEMU to exit. `scripts/vm.sh start` is for the separate, temporary user-service workflow and refuses to start alongside an installed system service.
 
-The demo is served on the guest's existing Tailscale address, port 8080. Its Tailscale state lives on the guest disk and is preserved by cold migration. The Ubuntu host's Tailscale identity is separate.
+Campfire, the chat demo, is served on the guest's existing Tailscale address, port 8080. Its Worker also preserves the original counter API. Its Tailscale state lives on the guest disk and is preserved by cold migration. The Ubuntu host's Tailscale identity is separate.
 
 ## Install or update the system service
 

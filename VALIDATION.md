@@ -36,3 +36,13 @@ Not performed for the initial bare-metal configuration: a full bare-metal system
 - Installed/enabled `openorange-homelab-vm.service` as a system service. Tested its orderly stop/start via restart; the unit stopped successfully and returned active. A physical host reboot was not performed.
 - Added a migration marker at the former development VM state directory so its helper refuses to start a second copy of the same Tailscale identity.
 - `nix flake check` passes with both VM configurations and all setup scripts checked by ShellCheck.
+
+
+## Campfire chat demo — November 13, 2026
+
+- Built a Slack-style channel chat Worker using one Workspace Durable Object and a SQLite-backed Channel Durable Object per room. The Bosgame configuration now deploys it as the existing `hello` service, preserving the original Wrangler identity and Counter binding/class.
+- Discovered the pinned OpenOrange primary runtime joins the default pool despite `RIVET_POOL`; avoided deploying independent Workers against that pool by combining the demos in one Worker. Documented this limitation.
+- Built the Docker image and complete Bosgame VM closure, including Nginx configuration validation. Adjusted proxy Host handling to preserve the explicitly configured application port while retaining Nginx's validated `$host` variable. Same-origin POST/WebSocket checks work through the actual Tailscale-facing proxy.
+- Live tests used two WebSocket clients through Tailscale and passed channel creation, origin validation/rejection, realtime messages, presence, typing, idempotent resend, persistent reactions, channel isolation, pagination and unknown-channel handling.
+- Restarted the Worker and confirmed its exact test message and reaction persisted. A newly connected WebSocket received that saved history. The earlier `vm-demo` and `tailnet-demo` counters both retained value 1 after the upgrade.
+- Guest reported no failed systemd units; the Ubuntu VM service and existing K3s service remained active. Nix flake checks and JavaScript syntax checks pass. Browser interactions were not automated; the served page, browser script syntax, HTTP and WebSocket behavior were checked.
