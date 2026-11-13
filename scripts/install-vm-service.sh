@@ -5,6 +5,8 @@ set -euo pipefail
 repo=$(cd "$(dirname "$0")/.." && pwd)
 state=${OPENORANGE_VM_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/openorange-homelab-vm}
 user=$(id -un)
+configuration=${OPENORANGE_VM_CONFIGURATION:-vm}
+[[ $configuration =~ ^[a-zA-Z0-9_-]+$ ]] || { echo 'Invalid flake configuration name.' >&2; exit 2; }
 [[ -c /dev/kvm ]] || { echo 'KVM is unavailable.' >&2; exit 1; }
 [[ $repo != *' '* && $state != *' '* ]] || { echo 'Use paths without spaces for the service.' >&2; exit 2; }
 sudo -n true
@@ -16,7 +18,7 @@ cp "$state/management.pub" "$state/share/management.pub"
 [[ ! -f $state/MIGRATED_TO ]] || { echo 'This state was migrated to another host. Refusing to duplicate its identity.' >&2; exit 1; }
 nix_bin=${NIX_BIN:-/nix/var/nix/profiles/default/bin/nix}
 cd "$repo"
-"$nix_bin" --extra-experimental-features 'nix-command flakes' build .#nixosConfigurations.vm.config.system.build.vm -o result-vm
+"$nix_bin" --extra-experimental-features 'nix-command flakes' build ".#nixosConfigurations.$configuration.config.system.build.vm" -o result-vm
 # Keep result-vm as a GC root; use its stable path for subsequent rebuilds.
 sudo install -m 0644 /dev/stdin /etc/systemd/system/openorange-homelab-vm.service <<UNIT
 [Unit]

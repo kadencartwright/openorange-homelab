@@ -31,6 +31,10 @@
       nixosModules.openorange = import ./modules/openorange.nix;
       nixosConfigurations.minipc = host;
       nixosConfigurations.vm = mkHost [ ./hosts/vm ];
+      nixosConfigurations.bosgame = mkHost [
+        ./hosts/vm
+        ./hosts/bosgame-vm
+      ];
       formatter.${system} = pkgs.nixfmt;
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
