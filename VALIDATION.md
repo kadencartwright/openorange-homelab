@@ -59,3 +59,10 @@ Not performed for the initial bare-metal configuration: a full bare-metal system
 - Ran the upstream EPUB smoke suite against the live HTTPS instance with a private cookie file. All upload/download hashes, search, OPDS pagination and cleanup checks passed.
 - Restarted the Folio Engine and Worker, re-applied migrations idempotently, and verified that the synthetic file's metadata, exact bytes and administrator session survived. Deleted the synthetic persistence file and signed out. The homelab library is left empty and independent.
 - Folio Engine, Worker, migrations, HTTPS service, Campfire, the Ubuntu VM service and K3s are healthy. Guest reports no failed units. Source and deployed web assets were checked over HTTP; no browser interaction or physical reader tests were run. No off-box backup destination or real SMTP provider is configured.
+
+## Folio removal — November 13, 2026
+
+- Removed the Folio module from the Bosgame configuration at the owner's request, rebuilt the VM and restarted it successfully. Flake checks passed.
+- Removed the private Tailscale Serve HTTPS route and Folio Worker image. No Folio unit files, containers or listeners remain; Tailscale reports no Serve configuration.
+- Retained `/var/lib/folio` with mode 0700 for recovery. The optional deployment source and scripts remain in this repository. The Cloudflare deployment was not changed.
+- Campfire responds over the tailnet on port 8080, and the original `vm-demo` counter still reads 1. The VM service, host K3s, Campfire Engine/Worker and Nginx are active; the guest has no failed units.
