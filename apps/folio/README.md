@@ -2,7 +2,7 @@
 
 This deployment uses the cleaned public [Folio source](https://github.com/kadencartwright/opds-r2-library), pinned by revision in `source.json`, and OpenOrange 1.0.1. Application code is unchanged; the build adds an Orange CLI and a homelab Wrangler configuration.
 
-Folio runs in the existing NixOS VM on Bosgame at **http://100.96.205.20:8081/**. Campfire remains on port 8080. This is an **independent, initially empty library**: no database, books, readers, credentials or sessions are copied from the Cloudflare installation. The existing cloud library is unchanged.
+Folio runs in the existing NixOS VM on Bosgame at **https://orangebox-vm.bleak-banana.ts.net/**. Campfire remains on port 8080. This is an **independent, initially empty library**: no database, books, readers, credentials or sessions are copied from the Cloudflare installation. The existing cloud library is unchanged.
 
 ## Storage and isolation
 
@@ -10,7 +10,7 @@ Folio runs in the existing NixOS VM on Bosgame at **http://100.96.205.20:8081/**
 - D1 is backed by a SQLite Durable Object on this Engine. All six upstream migrations are applied automatically after Worker readiness; subsequent runs skip already applied migrations.
 - R2 is backed by a separate Rivet Actor on the same Engine. It holds original ebooks and cover objects on the VM's local storage. There are no Cloudflare or S3 credentials in this deployment.
 - `/var/lib/folio` in the guest holds Engine logs, objects, Worker state and generated root-only secrets. The authentication signing secret and Engine token persist across restarts and never enter Git or the Nix store.
-- Worker HTTP binds loopback 18081; Nginx exposes 8081 only through the Tailscale interface. The Engine API is not exposed to the tailnet.
+- Worker HTTP binds loopback 18081; Nginx binds loopback 8081; Tailscale Serve exposes the app on private HTTPS port 443. Its Serve configuration is installed by a boot-time systemd service. The Engine API is not exposed to the tailnet. Folio’s MCP authentication requires HTTPS outside loopback, so the HTTPS origin is also used for callbacks and generated reader URLs.
 
 The default R2-on-Actor backend is suitable for trying the app and small collections. Large collections should use the supported S3 backend rather than placing an entire bucket in one Actor. Folio itself caps uploads at 16 MiB. This is not a migration of the public Cloudflare library or a backup of it.
 
@@ -34,11 +34,11 @@ For real email, configure an SMTP transport through OpenOrange's Email binding, 
 
 After creating a reader account in the authenticated UI:
 
-- OPDS 1.2: `http://100.96.205.20:8081/opds/v1/catalog.xml`
-- OPDS 2.0: `http://100.96.205.20:8081/opds/v2/catalog.json`
-- Reading sync: `http://100.96.205.20:8081`
+- OPDS 1.2: `https://orangebox-vm.bleak-banana.ts.net/opds/v1/catalog.xml`
+- OPDS 2.0: `https://orangebox-vm.bleak-banana.ts.net/opds/v2/catalog.json`
+- Reading sync: `https://orangebox-vm.bleak-banana.ts.net`
 
-Use these HTTP URLs only over the encrypted tailnet. Physical reader firmware and TLS behavior have not been tested in this deployment.
+These HTTPS URLs are available only within the tailnet. Physical reader firmware and TLS behavior have not been tested in this deployment.
 
 ## Build, deploy and inspect
 
@@ -63,10 +63,17 @@ A failed migration unit prevents a clean deployment; inspect it before serving t
 
 ## Backups
 
-The earlier OpenOrange backup script covers Campfire, not this separate Engine. For Folio, mount an off-box destination in the guest and run:
+The earlier OpenOrange backup script covers Campfire, not this separate Engine. For Folio, mount an off-box destination in the guest and run this from the Ubuntu host checkout:
 
 ```sh
-sudo bash scripts/backup-folio.sh /mnt/offbox-backups
+bash scripts/vm.sh ssh sudo bash -s -- /mnt/offbox-backups < scripts/backup-folio.sh
 ```
 
 This stops Folio and its Engine, archives all of `/var/lib/folio` including its secrets and both storage tiers, creates a checksum, and restarts previously active units. It does not stop Campfire. Store archives encrypted and verify restores independently. An automatic backup schedule is not enabled because no destination has been supplied.
+
+
+## Verification
+
+`node scripts/test-folio.mjs` uses the private sign-in helper without printing credentials and checks authentication, the blocked inbox/signup routes, a 1 MiB synthetic PDF upload/download, reader account creation and authenticated OPDS. It leaves only its synthetic file and a private local test receipt for the persistence check. After restarting the Folio Engine and starting `folio-migrations`, run `node scripts/test-folio.mjs --finish` to verify the exact file bytes survived, delete that file, and sign out. The temporary reader is deleted by the first phase. Tests need working tailnet DNS/HTTPS and SSH access to Bosgame; they do not contact the cloud library.
+
+The upstream smoke script was also run against the live HTTPS instance using a private cookie file. It passed EPUB ingestion/download, metadata search, OPDS pagination and deletion. All upstream tests pass on the controller. Browser interaction and physical ereader testing were not performed as part of this deployment.

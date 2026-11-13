@@ -18,7 +18,7 @@ One machine has one copy of its data: this is a home lab, not a highly available
 
 ## Ebook library
 
-The Bosgame VM also hosts an independent [Folio ebook library](apps/folio/README.md) on port 8081, built from the pinned public `opds-r2-library` source. It has its own local D1/R2 equivalents and Engine. The existing Cloudflare library is unchanged. See the deployment guide for the SSH-only simulated-email sign-in flow.
+The Bosgame VM also hosts an independent [Folio ebook library](apps/folio/README.md) at its private Tailscale HTTPS address, built from the pinned public `opds-r2-library` source. It has its own local D1/R2 equivalents and Engine. The existing Cloudflare library is unchanged. See the deployment guide for the SSH-only simulated-email sign-in flow.
 
 ## Chat demo
 

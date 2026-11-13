@@ -51,6 +51,10 @@ in
         assertion = config.services.openorange.enable;
         message = "Folio requires the OpenOrange host Docker configuration.";
       }
+      {
+        assertion = builtins.match "https://[A-Za-z0-9.-]+" cfg.origin != null;
+        message = "Use the VM's canonical Tailscale HTTPS origin without a path or port for Folio.";
+      }
     ];
     systemd.tmpfiles.rules = [
       "d /var/lib/folio 0700 root root -"

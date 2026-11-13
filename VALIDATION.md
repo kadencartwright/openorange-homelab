@@ -46,3 +46,16 @@ Not performed for the initial bare-metal configuration: a full bare-metal system
 - Live tests used two WebSocket clients through Tailscale and passed channel creation, origin validation/rejection, realtime messages, presence, typing, idempotent resend, persistent reactions, channel isolation, pagination and unknown-channel handling.
 - Restarted the Worker and confirmed its exact test message and reaction persisted. A newly connected WebSocket received that saved history. The earlier `vm-demo` and `tailnet-demo` counters both retained value 1 after the upgrade.
 - Guest reported no failed systemd units; the Ubuntu VM service and existing K3s service remained active. Nix flake checks and JavaScript syntax checks pass. Browser interactions were not automated; the served page, browser script syntax, HTTP and WebSocket behavior were checked.
+
+
+## Folio deployment — November 13, 2026
+
+- Waited for the referenced publishing thread to complete and verified that the cleaned `kadencartwright/opds-r2-library` repository was public. Built public revision `384f1c94e8a622c201ecca597d054b2817c3feb4`; did not deploy or alter the existing Cloudflare resources.
+- The original Folio type check, production build and all 10 tests passed. Built the app on OpenOrange 1.0.1 without application-code changes, using a deployment-only Wrangler configuration. Additional native dependency build approvals are explicit in the build script.
+- Tested all six D1 migrations and Folio's full sign-in/upload/download/search/OPDS-pagination/delete/sign-out smoke flow on an isolated controller Engine before VM deployment.
+- Deployed an independent Folio Engine and Worker on Bosgame. Explicit API/peer/metrics loopback ports 6440/6441/6450 avoid the existing Engine's metrics port. D1 and R2 equivalents persist under `/var/lib/folio`; no cloud data or credentials were imported.
+- Folio's MCP resource validation rejects non-loopback HTTP origins. Enabled private Tailscale Serve HTTPS, set the canonical HTTPS auth origin, and preserved that origin through Nginx. Certificates validated normally; no insecure-TLS override was used. Tailscale Serve configuration is applied by a boot-time systemd service.
+- Verified the live HTTPS app: generated a private sign-in link over SSH without printing it, established a secure admin cookie, confirmed unauthenticated catalog denial, and confirmed that the inbox and open signup routes return 404 through the proxy. Verified reader creation, authenticated OPDS 1.2 and exact-byte 1 MiB upload/download. Deleted the temporary reader.
+- Ran the upstream EPUB smoke suite against the live HTTPS instance with a private cookie file. All upload/download hashes, search, OPDS pagination and cleanup checks passed.
+- Restarted the Folio Engine and Worker, re-applied migrations idempotently, and verified that the synthetic file's metadata, exact bytes and administrator session survived. Deleted the synthetic persistence file and signed out. The homelab library is left empty and independent.
+- Folio Engine, Worker, migrations, HTTPS service, Campfire, the Ubuntu VM service and K3s are healthy. Guest reports no failed units. Source and deployed web assets were checked over HTTP; no browser interaction or physical reader tests were run. No off-box backup destination or real SMTP provider is configured.
