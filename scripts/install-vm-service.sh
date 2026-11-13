@@ -20,7 +20,9 @@ nix_bin=${NIX_BIN:-/nix/var/nix/profiles/default/bin/nix}
 cd "$repo"
 "$nix_bin" --extra-experimental-features 'nix-command flakes' build ".#nixosConfigurations.$configuration.config.system.build.vm" -o result-vm
 # Keep result-vm as a GC root; use its stable path for subsequent rebuilds.
-sudo install -m 0644 /dev/stdin /etc/systemd/system/openorange-homelab-vm.service <<UNIT
+unit_file=$(mktemp)
+trap 'rm -f "$unit_file"' EXIT
+cat > "$unit_file" <<UNIT
 [Unit]
 Description=OpenOrange NixOS home lab VM
 Wants=network-online.target
@@ -45,6 +47,7 @@ RestartSec=10
 [Install]
 WantedBy=multi-user.target
 UNIT
+sudo install -m 0644 "$unit_file" /etc/systemd/system/openorange-homelab-vm.service
 sudo systemctl daemon-reload
 sudo systemctl enable openorange-homelab-vm
 echo 'Installed boot-persistent service. Start with: sudo systemctl start openorange-homelab-vm'

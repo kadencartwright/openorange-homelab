@@ -24,3 +24,15 @@ Not performed for the initial bare-metal configuration: a full bare-metal system
 - The VM runner is managed by a systemd user service; state and management private key remain outside this repository.
 
 - Enrolled the running VM in the user’s tailnet using browser approval. Verified the demo HTML and counter API from the host through the VM’s Tailscale IPv4 address, including a successful POST increment. The host resolver did not resolve the VM’s MagicDNS name, so the verified access URL uses its Tailscale IP.
+
+
+## Ubuntu host deployment — November 13, 2026
+
+- Recovered SSH access to `lab-bosgame` through its existing Kubernetes admin credentials. A temporary, time-limited maintenance pod appended the controller's existing GitHub public key to the Ubuntu `lab` account, backed up the prior authorized-keys file, and was deleted. Ansible ping over the host's Tailscale address then succeeded.
+- Installed official, pinned Nix 2.35.3 in multi-user mode and built the complete `bosgame` VM closure on Ubuntu. No host OS replacement, disk formatting or host reboot.
+- Shut down the original development VM before transferring its disk and management key over SSH. Source and destination SHA-256 checksums matched before expanding the virtual disk from 40 GiB to 56 GiB. Expanded ext4 in the guest; it reports approximately 55 GiB usable capacity.
+- Booted the migrated VM on Bosgame with 12 vCPUs and 22 GiB assigned RAM. Confirmed the existing Tailscale identity and demo address survived. The `vm-demo` and `tailnet-demo` counters both retained their pre-migration value of 1.
+- Verified the demo page and counter API over Tailscale after migration and after restarting the Ubuntu system service. Guest has no failed systemd units. The host's K3s control plane remained Ready and active; the temporary maintenance pod is gone.
+- Installed/enabled `openorange-homelab-vm.service` as a system service. Tested its orderly stop/start via restart; the unit stopped successfully and returned active. A physical host reboot was not performed.
+- Added a migration marker at the former development VM state directory so its helper refuses to start a second copy of the same Tailscale identity.
+- `nix flake check` passes with both VM configurations and all setup scripts checked by ShellCheck.

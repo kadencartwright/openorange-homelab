@@ -20,6 +20,8 @@ One machine has one copy of its data: this is a home lab, not a highly available
 
 See [the VM guide](docs/vm.md) for a persistent local QEMU/KVM VM, Tailscale enrollment, and deployment of the included counter demo.
 
+For a boot-persistent VM on the existing Ubuntu mini PC, see [Ubuntu host operations](docs/ubuntu-host.md). The `bosgame` configuration assigns most of that machine’s CPU, memory, and available storage to the VM.
+
 ## Install on the mini PC
 
 1. Back up the mini PC. Boot a current **NixOS x86-64 installer USB in UEFI mode**, with Secure Boot disabled. Connect Ethernet (or configure networking from the installer). Have your SSH **public** key on the USB or otherwise available there.
