@@ -10,6 +10,12 @@ ssh_vm() {
 }
 case ${1:-status} in
   start)
+    if [[ -f $state/MIGRATED_TO ]]; then
+      echo "This VM was migrated to $(cat "$state/MIGRATED_TO"). Refusing to duplicate its Tailscale identity." >&2; exit 1
+    fi
+    if systemctl is-enabled --quiet "$unit" 2>/dev/null; then
+      echo "A system VM service is installed. Use: sudo systemctl start $unit" >&2; exit 1
+    fi
     if systemctl --user is-active --quiet "$unit"; then
       echo 'VM is already running. Use stop before starting a rebuilt configuration.' >&2; exit 1
     fi
